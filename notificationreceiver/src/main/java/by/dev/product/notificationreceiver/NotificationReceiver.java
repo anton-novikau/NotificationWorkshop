@@ -16,17 +16,19 @@
 
 package by.dev.product.notificationreceiver;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
+import static by.dev.product.notificationreceiver.NotificationService.EXTRA_ACION;
+import static by.dev.product.notificationreceiver.NotificationService.ACTION_SHOW_NOTIFICATION;
 
-public class ReceiverHome extends Activity {
-
+public class NotificationReceiver extends BroadcastReceiver {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_receiver_home);
+    public void onReceive(Context context, Intent intent) {
+        Intent serviceIntent = new Intent(context, NotificationService.class);
+        serviceIntent.putExtra(EXTRA_ACION, ACTION_SHOW_NOTIFICATION);
+        serviceIntent.putExtras(intent);
+        context.startService(serviceIntent);
     }
 }

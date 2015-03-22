@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+package by.dev.product.notificationreceiver;
 
-android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.0"
+import android.app.Application;
 
-    defaultConfig {
-        applicationId "by.dev.product.notificationreceiver"
-        minSdkVersion 21
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+public class ReceiverApplication extends Application {
+
+    private SoundManager mSoundManager;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mSoundManager = new SoundManager(this);
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-}
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    public SoundManager getSoundManager() {
+        return mSoundManager;
+    }
 }

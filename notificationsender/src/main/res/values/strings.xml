@@ -1,3 +1,44 @@
+<!--
+  ~ Copyright 2015 GDG Minsk
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <resources>
     <string name="app_name">Notification Sender</string>
+    <string name="caller_name">Joan Doe</string>
+    <string name="call_message">Incoming call</string>
+    <string name="call_ticker">Joan Doe colling</string>
+    <string name="short_message">Hi Anton!\nHow are you?</string>
+    <string name="long_message"><![CDATA[Hi Anton,
+      I heard a funny joke about NoSQL:
+
+      "A DBA walks into a NoSQL bar, but turns around and leaves - he couldn't find a table"
+
+      have you heard the one?
+    ]]></string>
+
+    <string name="priorities_label">Priorities</string>
+    <string name="visibility_label">Visibility</string>
+    <string name="use_heads_up">Use Heads Up (Always true for calls)</string>
+    <string name="use_notification_to_play">Use Notification.Builder() to vibrate and play sound</string>
+    <string name="play_sound">Play sound</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="local_notification">Local notification</string>
+    <string name="message_type">Message Type (Not used for Calls): </string>
+    <string name="message_type_short">Short Message</string>
+    <string name="message_type_long">Long Message</string>
+
+    <string name="btn_call">Call</string>
+    <string name="btn_message">Message</string>
 </resources>
