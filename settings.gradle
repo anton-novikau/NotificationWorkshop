@@ -1,1 +1,1 @@
-include ':app', ':notificationreceiver'
+include ':notificationsender', ':notificationreceiver'
