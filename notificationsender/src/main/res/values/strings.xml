@@ -20,13 +20,7 @@
     <string name="call_message">Incoming call</string>
     <string name="call_ticker">Joan Doe colling</string>
     <string name="short_message">Hi Anton!\nHow are you?</string>
-    <string name="long_message"><![CDATA[Hi Anton,
-      I heard a funny joke about NoSQL:
-
-      "A DBA walks into a NoSQL bar, but turns around and leaves - he couldn't find a table"
-
-      have you heard the one?
-    ]]></string>
+    <string name="long_message">Hi Anton,\nI heard a funny joke about NoSQL:\n\n\"A DBA walks into a NoSQL bar, but turns around and leaves - he couldn\'t find a table\"\n\nhave you heard the one?</string>
 
     <string name="priorities_label">Priorities</string>
     <string name="visibility_label">Visibility</string>

@@ -13,13 +13,13 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="by.dev.product.notificationreceiver" >
 
-    <permission android:name="by.dev.product.permission.NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <permission android:name="by.dev.product.permission.NOTIFICATIONS" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".ReceiverApplication"
@@ -28,23 +28,41 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".ReceiverHome"
-            android:label="@string/app_name" >
+            android:name=".MediaPlayerActivity"
+            android:label="@string/title_media_player" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".IncomingCallActivity"
+            android:label="@string/title_activity_incoming_call"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity
+            android:name=".CallInProgressActivity"
+            android:label="@string/title_activity_call_in_progress"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".ChatActivity" />
 
-        <service android:name=".NotificationService" android:exported="false"/>
-        <receiver android:name=".NotificationReceiver"
-            android:permission="by.dev.product.permission.NOTIFICATIONS">
+        <service
+            android:name=".NotificationService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".NotificationReceiver"
+            android:permission="by.dev.product.permission.NOTIFICATIONS" >
             <intent-filter>
-                <action android:name="by.dev.product.action.NOTIFICATION"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="by.dev.product.action.NOTIFICATION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
+
     </application>
 
 </manifest>

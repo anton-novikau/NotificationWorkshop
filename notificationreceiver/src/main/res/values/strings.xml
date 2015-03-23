@@ -16,4 +16,19 @@
 
 <resources>
     <string name="app_name">Notification Receiver</string>
+    <string name="call_summary">Incoming Call</string>
+    <string name="message_summary">New Message</string>
+    <string name="title_media_player">Media Player</string>
+    <string name="title_activity_incoming_call">Incoming Call</string>
+    <string name="title_activity_call_in_progress">Call In Progress</string>
+    <string name="incoming_call_text">%s calling…</string>
+    <string name="call_in_progress_text">Call in progress</string>
+    <string name="call_finished">Call finished</string>
+    <string name="btn_answer">Answer</string>
+    <string name="btn_decline">Decline</string>
+    <string name="btn_hangup">Hang Up</string>
+    <string name="title_activity_chat">ChatActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

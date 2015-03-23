@@ -16,6 +16,7 @@
 
 package by.dev.product.notificationreceiver;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -70,10 +71,10 @@ public class NotificationService extends IntentService {
                 break;
             case ACTION_CANCEL_CALL:
                 ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(ID_CALL);
+                ((ReceiverApplication) getApplication()).getSoundManager().stopRingtone();
                 break;
             case ACTION_STOP_RINGTONE:
-                ReceiverApplication app = (ReceiverApplication) getApplication();
-                app.getSoundManager().stopRingtone();
+                ((ReceiverApplication) getApplication()).getSoundManager().stopRingtone();
                 break;
             case ACTION_UNKNOWN: // fall through
             default:
@@ -85,26 +86,26 @@ public class NotificationService extends IntentService {
     private void showNotification(Intent intent) {
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.drawable.ic_small_notification);
+        // repeat sound only for calls
+        boolean isCall = intent.getBooleanExtra(REPEAT_SOUND, false);
         String ticker = intent.getStringExtra(TICKER);
         builder.setTicker(ticker);
+        String callerName = intent.getStringExtra(TITLE);
+        builder.setContentTitle(callerName);
+        String message = intent.getStringExtra(MESSAGE);
+        builder.setContentText(message);
         int style = intent.getIntExtra(STYLE, SHORT_MESSAGE);
-        switch (style) {
-            case LONG_MESSAGE:
-                Notification.BigTextStyle textStyle = new Notification.BigTextStyle(builder);
-                textStyle.setBigContentTitle(intent.getStringExtra(TITLE));
-                textStyle.setSummaryText(ticker);
-                textStyle.bigText(intent.getStringExtra(MESSAGE));
-                builder.setStyle(textStyle);
-                break;
-            case SHORT_MESSAGE: // fall through
-                builder.setContentTitle(intent.getStringExtra(TITLE));
-                builder.setContentText(intent.getStringExtra(MESSAGE));
-            default:
-                break;
+        if (style == LONG_MESSAGE) {
+            Notification.BigTextStyle textStyle = new Notification.BigTextStyle(builder);
+            textStyle.setBigContentTitle(callerName);
+            textStyle.setSummaryText(getString(isCall ? R.string.call_summary : R.string.message_summary));
+            textStyle.bigText(message);
+            builder.setStyle(textStyle);
         }
         builder.setLocalOnly(intent.getBooleanExtra(LOCAL, false));
         builder.setOngoing(intent.getBooleanExtra(ONGOING_NOTIFICATION, false));
-        builder.setPriority(intent.getIntExtra(PRIORITY, Notification.PRIORITY_DEFAULT));
+        int priority = intent.getIntExtra(PRIORITY, Notification.PRIORITY_DEFAULT);
+        builder.setPriority(priority);
         builder.setVisibility(intent.getIntExtra(VISIBILITY, Notification.VISIBILITY_PUBLIC));
         String category = intent.getStringExtra(CATEGORY);
         builder.setCategory(category);
@@ -123,7 +124,7 @@ public class NotificationService extends IntentService {
 
         boolean playSound = intent.getBooleanExtra(SOUND, false);
         boolean vibrate = intent.getBooleanExtra(VIBRATE, false);
-        boolean loop = intent.getBooleanExtra(REPEAT_SOUND, false);
+
         boolean useNotificationSounds = intent.getBooleanExtra(USE_NOTIFICATION_SOUNDS, false);
         if (useNotificationSounds) {
             if (playSound) builder.setSound(ringtoneUri);
@@ -131,14 +132,41 @@ public class NotificationService extends IntentService {
         } else {
             ReceiverApplication app = (ReceiverApplication) getApplication();
             SoundManager sm = app.getSoundManager();
-            if (playSound) sm.playRingtone(ringtoneUri, loop);
-            if (vibrate) sm.vibrate(VIBRATE_PATTERN, loop);
+            if (playSound) sm.playRingtone(ringtoneUri, isCall);
+            if (vibrate) sm.vibrate(VIBRATE_PATTERN, isCall);
 
             Intent deleteIntent = new Intent(this, NotificationService.class);
             deleteIntent.putExtra(EXTRA_ACION, ACTION_STOP_RINGTONE);
             builder.setDeleteIntent(PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
-        // TODO: add actions
+
+        if (isCall) {
+            Intent answerIntent = new Intent(this, CallInProgressActivity.class);
+            answerIntent.putExtra(CallInProgressActivity.EXTRA_CALLER_NAME, callerName);
+            answerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent answerPendingIntent = PendingIntent.getActivity(this, 0, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addAction(R.drawable.stat_sys_phone_call, getString(R.string.btn_answer), answerPendingIntent);
+
+            Intent declineIntent = new Intent(this, NotificationService.class);
+            declineIntent.putExtra(EXTRA_ACION, ACTION_CANCEL_CALL);
+            PendingIntent declinePendingIntent = PendingIntent.getService(this, 0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addAction(R.drawable.stat_sys_phone_call_end, getString(R.string.btn_decline), declinePendingIntent);
+
+            Intent incomingCall = new Intent(this, IncomingCallActivity.class);
+            incomingCall.putExtra(IncomingCallActivity.EXTRA_CALLER, callerName);
+            incomingCall.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent incomingCallPending = PendingIntent.getActivity(this, 0, incomingCall, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.setFullScreenIntent(incomingCallPending, true);
+            builder.setContentIntent(incomingCallPending);
+        } else {
+            Intent messageIntent = new Intent(this, ChatActivity.class);
+            messageIntent.putExtra(ChatActivity.EXTRA_MESSAGE, message);
+            messageIntent.putExtra(ChatActivity.EXTRA_PARTICIPANT, callerName);
+            messageIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent messagePendingIntent = PendingIntent.getActivity(this, 0, messageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if (intent.getBooleanExtra(HEADS_UP, false)) builder.setFullScreenIntent(messagePendingIntent, priority == Notification.PRIORITY_MAX);
+            builder.setContentIntent(messagePendingIntent);
+        }
 
         // setup large user icon for connected wearable
         Notification.WearableExtender extender = new Notification.WearableExtender();
@@ -146,7 +174,7 @@ public class NotificationService extends IntentService {
         builder.extend(extender);
 
         Notification notification = builder.build();
-        if (useNotificationSounds && loop) notification.flags |= Notification.FLAG_INSISTENT;
+        if (useNotificationSounds && isCall) notification.flags |= Notification.FLAG_INSISTENT;
 
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         nm.notify(notificationId, notification);

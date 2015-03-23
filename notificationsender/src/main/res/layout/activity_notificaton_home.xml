@@ -125,7 +125,13 @@
             android:layout_alignTop="@id/visibility_label"
             android:layout_toEndOf="@id/visibility_label"/>
 
-        <View
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/visibility_label"
+            android:layout_above="@+id/send_call"/>
+
+        <Space
             android:id="@+id/anchor"
             android:layout_width="0dp"
             android:layout_height="0dp"
