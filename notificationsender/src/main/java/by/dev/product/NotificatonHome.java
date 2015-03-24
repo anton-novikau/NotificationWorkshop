@@ -170,7 +170,7 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
     }
 
     enum Priority {
-        DEFAULT(Notification.PRIORITY_DEFAULT), MIN(Notification.PRIORITY_MIN), MAX(Notification.PRIORITY_MAX);
+        DEFAULT(Notification.PRIORITY_DEFAULT), MIN(Notification.PRIORITY_MIN), LOW(Notification.PRIORITY_LOW), HIGH(Notification.PRIORITY_HIGH), MAX(Notification.PRIORITY_MAX);
 
         final int priority;
 
