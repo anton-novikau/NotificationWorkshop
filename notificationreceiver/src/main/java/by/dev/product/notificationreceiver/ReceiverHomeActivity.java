@@ -19,12 +19,10 @@ package by.dev.product.notificationreceiver;
 import android.app.Activity;
 import android.os.Bundle;
 
-
-public class MediaPlayerActivity extends Activity {
-
+public class ReceiverHomeActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_media_player);
+        setContentView(R.layout.activity_receiver_home);
     }
 }

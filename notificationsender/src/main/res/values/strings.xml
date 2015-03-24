@@ -18,7 +18,7 @@
     <string name="app_name">Notification Sender</string>
     <string name="caller_name">Joan Doe</string>
     <string name="call_message">Incoming call</string>
-    <string name="call_ticker">Joan Doe colling</string>
+    <string name="call_ticker">Joan Doe calling</string>
     <string name="short_message">Hi Anton!\nHow are you?</string>
     <string name="long_message">Hi Anton,\nI heard a funny joke about NoSQL:\n\n\"A DBA walks into a NoSQL bar, but turns around and leaves - he couldn\'t find a table\"\n\nhave you heard the one?</string>
 
@@ -29,6 +29,7 @@
     <string name="play_sound">Play sound</string>
     <string name="vibrate">Vibrate</string>
     <string name="local_notification">Local notification</string>
+    <string name="use_audio_attributes">Use Audio Attributes</string>
     <string name="message_type">Message Type (Not used for Calls): </string>
     <string name="message_type_short">Short Message</string>
     <string name="message_type_long">Long Message</string>

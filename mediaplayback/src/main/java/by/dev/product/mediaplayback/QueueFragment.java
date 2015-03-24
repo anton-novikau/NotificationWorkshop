@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-include ':notificationsender', ':notificationreceiver', ':mediaplayback'
+package by.dev.product.mediaplayback;
+
+import android.app.ListFragment;
+import android.os.Bundle;
+
+public class QueueFragment extends ListFragment {
+
+    public static QueueFragment newInstance() {
+        QueueFragment fragment = new QueueFragment();
+
+        return fragment;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+}

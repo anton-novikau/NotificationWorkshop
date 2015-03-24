@@ -63,12 +63,19 @@
             android:layout_below="@id/vibrate"
             android:text="@string/local_notification"/>
 
+        <CheckBox
+            android:id="@+id/use_attrs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/local"
+            android:text="@string/use_audio_attributes"/>
+
         <TextView
             android:id="@+id/message_type_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_below="@id/local"
+            android:layout_below="@id/use_attrs"
             android:text="@string/message_type"/>
 
         <RadioGroup

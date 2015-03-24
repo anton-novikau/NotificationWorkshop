@@ -31,6 +31,7 @@ public interface NotificationConfig {
     String VISIBILITY = "notification_visibility";
     String HEADS_UP = "heads_up_notification";
     String USE_NOTIFICATION_SOUNDS = "use_notification_sounds";
+    String USE_AUDIO_ATTRIBUTES = "use_audio_attributes";
 
     int LONG_MESSAGE = 1;
     int SHORT_MESSAGE = 2;

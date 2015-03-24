@@ -42,6 +42,7 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
     private CheckBox mPlaySound;
     private CheckBox mVibrate;
     private CheckBox mLocal;
+    private CheckBox mUseAudioAttrs;
     private RadioGroup mMessageType;
 
     @Override
@@ -54,9 +55,15 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
         mPlaySound = (CheckBox) findViewById(R.id.play_sound);
         mVibrate = (CheckBox) findViewById(R.id.vibrate);
         mLocal = (CheckBox) findViewById(R.id.local);
+        mUseAudioAttrs = (CheckBox) findViewById(R.id.use_attrs);
         mMessageType = (RadioGroup) findViewById(R.id.message_type);
         mPriorities = (Spinner) findViewById(R.id.priorities_spinner);
         mVisibility = (Spinner) findViewById(R.id.visibility_spinner);
+
+        if (savedInstanceState == null) {
+            mUseNotificationToPlay.setEnabled(false);
+            mUseAudioAttrs.setEnabled(false);
+        }
 
         ArrayAdapter<Priority> prioritiesAdapter = new ArrayAdapter<Priority>(this, android.R.layout.simple_spinner_item, Priority.values());
         prioritiesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -65,8 +72,19 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
         mPriorities.setAdapter(prioritiesAdapter);
         mVisibility.setAdapter(visibilityAdapter);
 
+        mPlaySound.setOnClickListener(this);
+        mVibrate.setOnClickListener(this);
+        mUseNotificationToPlay.setOnClickListener(this);
         findViewById(R.id.send_call).setOnClickListener(this);
         findViewById(R.id.send_message).setOnClickListener(this);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        setUseNotificatonBuilderState();
+        setAudioAttrsState();
     }
 
     @Override
@@ -79,7 +97,28 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
             case R.id.send_message:
                 initMessage();
                 break;
+            case R.id.play_sound: // fall through
+            case R.id.vibrate: // fall through
+                setUseNotificatonBuilderState();
+                setAudioAttrsState();
+                break;
+            case R.id.use_notification_to_play:
+                setAudioAttrsState();
+                break;
         }
+    }
+
+    private void setUseNotificatonBuilderState() {
+        setCheckBoxState(mPlaySound.isChecked() || mVibrate.isChecked(), mUseNotificationToPlay);
+    }
+
+    private void setAudioAttrsState() {
+        setCheckBoxState(!mUseNotificationToPlay.isChecked() && (mPlaySound.isChecked() || mVibrate.isChecked()), mUseAudioAttrs);
+    }
+
+    private static void setCheckBoxState(boolean enabled, CheckBox view) {
+        if (!enabled) view.setChecked(false);
+        view.setEnabled(enabled);
     }
 
     private void initCall() {
@@ -126,6 +165,7 @@ public class NotificatonHome extends Activity implements View.OnClickListener {
         config.putBoolean(SOUND, mPlaySound.isChecked());
         config.putBoolean(VIBRATE, mVibrate.isChecked());
         config.putBoolean(USE_NOTIFICATION_SOUNDS, mUseNotificationToPlay.isChecked());
+        config.putBoolean(USE_AUDIO_ATTRIBUTES, mUseAudioAttrs.isChecked());
         return config;
     }
 

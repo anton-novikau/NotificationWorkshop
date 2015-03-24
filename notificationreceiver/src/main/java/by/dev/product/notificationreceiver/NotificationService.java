@@ -16,7 +16,6 @@
 
 package by.dev.product.notificationreceiver;
 
-import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -85,9 +84,9 @@ public class NotificationService extends IntentService {
 
     private void showNotification(Intent intent) {
         Notification.Builder builder = new Notification.Builder(this);
-        builder.setSmallIcon(R.drawable.ic_small_notification);
         // repeat sound only for calls
         boolean isCall = intent.getBooleanExtra(REPEAT_SOUND, false);
+        builder.setSmallIcon(isCall ? R.drawable.stat_sys_phone_call : R.drawable.stat_notify_chat);
         String ticker = intent.getStringExtra(TICKER);
         builder.setTicker(ticker);
         String callerName = intent.getStringExtra(TITLE);
@@ -132,8 +131,9 @@ public class NotificationService extends IntentService {
         } else {
             ReceiverApplication app = (ReceiverApplication) getApplication();
             SoundManager sm = app.getSoundManager();
-            if (playSound) sm.playRingtone(ringtoneUri, isCall);
-            if (vibrate) sm.vibrate(VIBRATE_PATTERN, isCall);
+            boolean useAttrs = intent.getBooleanExtra(USE_AUDIO_ATTRIBUTES, false);
+            if (playSound) sm.playRingtone(ringtoneUri, isCall, useAttrs);
+            if (vibrate) sm.vibrate(VIBRATE_PATTERN, isCall, useAttrs);
 
             Intent deleteIntent = new Intent(this, NotificationService.class);
             deleteIntent.putExtra(EXTRA_ACION, ACTION_STOP_RINGTONE);

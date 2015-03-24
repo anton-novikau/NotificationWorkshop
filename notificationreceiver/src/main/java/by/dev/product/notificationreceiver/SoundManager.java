@@ -37,17 +37,21 @@ public class SoundManager {
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
-    public void playRingtone(Uri ringtone, boolean loop) {
+    public void playRingtone(Uri ringtone, boolean loop, boolean useAttrs) {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.stop();
         try {
-            AudioAttributes.Builder aa = new AudioAttributes.Builder();
-            aa.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
-            aa.setUsage(loop ? AudioAttributes.USAGE_NOTIFICATION_RINGTONE : AudioAttributes.USAGE_NOTIFICATION);
+            AudioAttributes attrs = null;
+            if (useAttrs) {
+                AudioAttributes.Builder aa = new AudioAttributes.Builder();
+                aa.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
+                aa.setUsage(loop ? AudioAttributes.USAGE_NOTIFICATION_RINGTONE : AudioAttributes.USAGE_NOTIFICATION);
+                attrs = aa.build();
+            }
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setDataSource(mContext, ringtone);
             mMediaPlayer.setLooping(loop);
             mMediaPlayer.setAudioStreamType(loop ? AudioManager.STREAM_RING : AudioManager.STREAM_NOTIFICATION);
-            mMediaPlayer.setAudioAttributes(aa.build());
+            if (useAttrs) mMediaPlayer.setAudioAttributes(attrs);
             mMediaPlayer.prepare();
             mMediaPlayer.start();
         } catch (IOException e) {
@@ -55,37 +59,19 @@ public class SoundManager {
         }
     }
 
-    public void vibrate(long[] pattern, boolean loop) {
-        AudioAttributes.Builder aa = new AudioAttributes.Builder();
-        aa.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
-        aa.setUsage(loop ? AudioAttributes.USAGE_NOTIFICATION_RINGTONE : AudioAttributes.USAGE_NOTIFICATION);
-        mVibrator.vibrate(pattern, loop ? 0 : -1, aa.build());
+    public void vibrate(long[] pattern, boolean loop, boolean useAttrs) {
+        AudioAttributes attrs = null;
+        if (useAttrs) {
+            AudioAttributes.Builder aa = new AudioAttributes.Builder();
+            aa.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
+            aa.setUsage(loop ? AudioAttributes.USAGE_NOTIFICATION_RINGTONE : AudioAttributes.USAGE_NOTIFICATION);
+            attrs = aa.build();
+        }
+        mVibrator.vibrate(pattern, loop ? 0 : -1, attrs);
     }
 
     public void stopRingtone() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.stop();
         mVibrator.cancel();
-    }
-
-    public void playMedia(Uri file) {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.stop();
-        try {
-            AudioAttributes.Builder aa = new AudioAttributes.Builder();
-            aa.setUsage(AudioAttributes.USAGE_MEDIA);
-            aa.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setDataSource(mContext, file);
-            mMediaPlayer.setLooping(false);
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setAudioAttributes(aa.build());
-            mMediaPlayer.prepare();
-            mMediaPlayer.start();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to play media file", e);
-        }
-    }
-
-    public void stopMedia() {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.stop();
     }
 }
