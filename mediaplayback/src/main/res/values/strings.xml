@@ -17,7 +17,11 @@
 <resources>
     <string name="app_name">Media Playback</string>
     <plurals name="aritst_description">
-      <item quantity="one">%d album</item>
-      <item quantity="other">%d albums</item>
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
     </plurals>
+    <string name="label_play">Play</string>
+    <string name="label_pause">Pause</string>
+    <string name="label_previous">Previous</string>
+    <string name="label_next">Next</string>
 </resources>

@@ -109,7 +109,6 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         mPlayingQueue = new ArrayList<>();
 
         mMusicProvider = new MusicProvider(this);
-        mNotificationManager = new MediaNotificationManager(this);
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         // Start a new MediaSession
@@ -120,6 +119,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
                 MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         updatePlaybackState(null);
+        mNotificationManager = new MediaNotificationManager(this);
     }
 
     @Override
