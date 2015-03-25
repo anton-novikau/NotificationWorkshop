@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package by.dev.product.notificationsender;
+package by.dev.product;
 
 public interface NotificationConfig {
     String TITLE = "notification_title";

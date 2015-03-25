@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package by.dev.product;
+package by.dev.product.notificationsender;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -26,9 +26,23 @@ import android.widget.CheckBox;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
-import by.dev.product.notificationsender.R;
-
-import static by.dev.product.notificationsender.NotificationConfig.*;
+import static by.dev.product.NotificationConfig.CATEGORY;
+import static by.dev.product.NotificationConfig.HEADS_UP;
+import static by.dev.product.NotificationConfig.LOCAL;
+import static by.dev.product.NotificationConfig.LONG_MESSAGE;
+import static by.dev.product.NotificationConfig.MESSAGE;
+import static by.dev.product.NotificationConfig.ONGOING_NOTIFICATION;
+import static by.dev.product.NotificationConfig.PRIORITY;
+import static by.dev.product.NotificationConfig.REPEAT_SOUND;
+import static by.dev.product.NotificationConfig.SHORT_MESSAGE;
+import static by.dev.product.NotificationConfig.SOUND;
+import static by.dev.product.NotificationConfig.STYLE;
+import static by.dev.product.NotificationConfig.TICKER;
+import static by.dev.product.NotificationConfig.TITLE;
+import static by.dev.product.NotificationConfig.USE_AUDIO_ATTRIBUTES;
+import static by.dev.product.NotificationConfig.USE_NOTIFICATION_SOUNDS;
+import static by.dev.product.NotificationConfig.VIBRATE;
+import static by.dev.product.NotificationConfig.VISIBILITY;
 
 
 public class NotificatonHome extends Activity implements View.OnClickListener {

@@ -28,7 +28,23 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
-import static by.dev.product.NotificationConfig.*;
+import static by.dev.product.NotificationConfig.CATEGORY;
+import static by.dev.product.NotificationConfig.HEADS_UP;
+import static by.dev.product.NotificationConfig.LOCAL;
+import static by.dev.product.NotificationConfig.LONG_MESSAGE;
+import static by.dev.product.NotificationConfig.MESSAGE;
+import static by.dev.product.NotificationConfig.ONGOING_NOTIFICATION;
+import static by.dev.product.NotificationConfig.PRIORITY;
+import static by.dev.product.NotificationConfig.REPEAT_SOUND;
+import static by.dev.product.NotificationConfig.SHORT_MESSAGE;
+import static by.dev.product.NotificationConfig.SOUND;
+import static by.dev.product.NotificationConfig.STYLE;
+import static by.dev.product.NotificationConfig.TICKER;
+import static by.dev.product.NotificationConfig.TITLE;
+import static by.dev.product.NotificationConfig.USE_AUDIO_ATTRIBUTES;
+import static by.dev.product.NotificationConfig.USE_NOTIFICATION_SOUNDS;
+import static by.dev.product.NotificationConfig.VIBRATE;
+import static by.dev.product.NotificationConfig.VISIBILITY;
 
 public class NotificationService extends IntentService {
     private static final String SERVICE_NAME = "NotificationService";
