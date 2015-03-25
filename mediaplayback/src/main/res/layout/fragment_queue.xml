@@ -1,5 +1,5 @@
-<!--
-  ~ Copyright 2015 GDG Minsk
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~  Copyright 2015 GDG Minsk
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,10 +14,18 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <string name="app_name">Media Playback</string>
-    <plurals name="aritst_description">
-      <item quantity="one">%d album</item>
-      <item quantity="other">%d albums</item>
-    </plurals>
-</resources>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/media_control"
+        layout="@layout/media_control_header" />
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:listSelector="@null"/>
+</LinearLayout>

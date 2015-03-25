@@ -15,9 +15,40 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeightLarge"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
-</LinearLayout>
+  <TextView
+      android:id="@+id/title"
+      android:textAppearance="?android:attr/textAppearanceListItem"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:singleLine="true"
+      android:layout_marginTop="8dp" />
+
+  <TextView
+      android:id="@+id/artist"
+      android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textColor="?android:attr/textColorSecondary"
+      android:singleLine="true"
+      android:layout_marginTop="3dp"
+      android:layout_below="@id/title"
+      android:layout_alignStart="@id/title" />
+
+  <TextView
+      android:id="@+id/album"
+      android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textColor="?android:attr/textColorSecondary"
+      android:singleLine="true"
+      android:layout_marginTop="3dp"
+      android:layout_below="@id/artist"
+      android:layout_alignStart="@id/title" />
+</RelativeLayout>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 GDG Minsk
+ * Copyright 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package by.dev.product.mediaplayback;
 
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.browse.MediaBrowser;
@@ -29,10 +30,20 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import by.dev.product.mediaplayback.md.Album;
+import by.dev.product.mediaplayback.md.Artist;
+import by.dev.product.mediaplayback.util.MediaIdUtil;
+
+import static by.dev.product.mediaplayback.util.MediaIdUtil.MEDIA_ID_ROOT;
+import static by.dev.product.mediaplayback.util.QueueUtil.canPlayItem;
+import static by.dev.product.mediaplayback.util.QueueUtil.convertToQueue;
+import static by.dev.product.mediaplayback.util.QueueUtil.getMusicIndexOnQueue;
 
 public class MusicService extends MediaBrowserService implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
@@ -49,6 +60,8 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
     // The volume we set the media player when we have audio focus.
     public static final float VOLUME_NORMAL = 1.0f;
 
+    private MusicProvider mMusicProvider;
+    private MediaNotificationManager mNotificationManager;
     private MediaPlayer mMediaPlayer;
     private MediaSession mSession;
     private List<MediaSession.QueueItem> mPlayingQueue;
@@ -95,7 +108,8 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         super.onCreate();
         mPlayingQueue = new ArrayList<>();
 
-        // TODO: INIT Music provider
+        mMusicProvider = new MusicProvider(this);
+        mNotificationManager = new MediaNotificationManager(this);
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         // Start a new MediaSession
@@ -106,8 +120,6 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
                 MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         updatePlaybackState(null);
-
-        // TODO: create notifiction manager
     }
 
     @Override
@@ -128,13 +140,45 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
     @Override
     public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
         Log.d(LOG_TAG, "OnGetRoot: clientPackageName=" + clientPackageName + "; clientUid=" + clientUid + " ; rootHints=" + rootHints);
-        // TODO: implement me
-        return null;// new BrowserRoot(MEDIA_ID_ROOT, null);
+        return new BrowserRoot(MEDIA_ID_ROOT, null);
     }
 
     @Override
     public void onLoadChildren(String parentId, Result<List<MediaBrowser.MediaItem>> result) {
-        // TODO: implement me
+        List<MediaBrowser.MediaItem> mediaItems = new ArrayList<>();
+        if (MEDIA_ID_ROOT.equals(parentId)) {
+            Iterable<Artist> artists = mMusicProvider.getArtists();
+            for (Artist artist : artists) {
+                mediaItems.add(new MediaBrowser.MediaItem(
+                        new MediaDescription.Builder()
+                                .setMediaId(MediaIdUtil.createArtistId(artist.getId()))
+                                .setTitle(artist.getName())
+                                .setDescription(getResources().getQuantityString(R.plurals.aritst_description, artist.getNumberOfAlbums(), artist.getNumberOfAlbums()))
+                                .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
+                ));
+            }
+        } else if (MediaIdUtil.isArtistMediaId(parentId)){
+            String artistKey = MediaIdUtil.getArtistKeyFromId(parentId);
+            Iterable<Album> albums = mMusicProvider.getAlbums(artistKey);
+            for (Album album : albums) {
+                mediaItems.add(new MediaBrowser.MediaItem(
+                        new MediaDescription.Builder()
+                                .setMediaId(album.getId())
+                                .setTitle(album.getTitle())
+                                .setDescription(album.getArtistName())
+                                .build(), MediaBrowser.MediaItem.FLAG_BROWSABLE
+                ));
+            }
+        } else {
+            Iterable<MediaMetadata> tracks = mMusicProvider.getTracks(parentId);
+            for (MediaMetadata track : tracks) {
+                mediaItems.add(new MediaBrowser.MediaItem(
+                        track.getDescription(), MediaBrowser.MediaItem.FLAG_PLAYABLE
+                ));
+            }
+        }
+
+        result.sendResult(mediaItems);
     }
 
     @Override
@@ -218,7 +262,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         stateBuilder.setState(mState, position, 1.0f, SystemClock.elapsedRealtime());
 
         // Set the activeQueueItemId if the current index is valid.
-        if (canPlayCurrent()) {
+        if (canPlayItem(mPlayingQueue, mCurrentIndexOnQueue)) {
             MediaSession.QueueItem item = mPlayingQueue.get(mCurrentIndexOnQueue);
             stateBuilder.setActiveQueueItemId(item.getQueueId());
         }
@@ -226,8 +270,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         mSession.setPlaybackState(stateBuilder.build());
 
         if (mState == PlaybackState.STATE_PLAYING || mState == PlaybackState.STATE_PAUSED) {
-            // TODO: show playback notification
-            //mMediaNotificationManager.startNotification();
+            mNotificationManager.showPlaybackManager();
         }
     }
 
@@ -250,19 +293,18 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
     }
 
     private MediaMetadata getCurrentPlayingMusic() {
-        if (canPlayCurrent()) {
+        if (canPlayItem(mPlayingQueue, mCurrentIndexOnQueue)) {
             MediaSession.QueueItem item = mPlayingQueue.get(mCurrentIndexOnQueue);
             if (item != null) {
                 Log.d(LOG_TAG, "getCurrentPlayingMusic for musicId=" + item.getDescription().getMediaId());
-                // TODO: get media metadata from google music
-                return null; // mMusicProvider.getMusic(item.getDescription().getMediaId());
+                return mMusicProvider.findTrackById(item.getDescription().getMediaId());
             }
         }
         return null;
     }
 
     private void releaseResources(boolean releaseMediaPlayer) {
-        Log.d(LOG_TAG, "relaxResources. releaseMediaPlayer=" + releaseMediaPlayer);
+        Log.d(LOG_TAG, "releaseResources. releaseMediaPlayer=" + releaseMediaPlayer);
         // stop being a foreground service
         stopForeground(true);
 
@@ -333,8 +375,8 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
                     " playQueue.size=" + (mPlayingQueue==null?"null": mPlayingQueue.size()));
             return;
         }
-        // TODO: obtain track path from media metadata
-        String source = "";// track.getString(MusicProvider.CUSTOM_METADATA_TRACK_SOURCE);
+
+        String source = track.getString(MusicProvider.METADATA_TRACK_PATH);
         Log.d(LOG_TAG, "playSong:  current (" + mCurrentIndexOnQueue + ") in playingQueue. " +
                 " musicId=" + track.getString(MediaMetadata.METADATA_KEY_MEDIA_ID) +
                 " source=" + source);
@@ -367,7 +409,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
     }
 
     private void updateMetadata() {
-        if (!canPlayCurrent()) {
+        if (!canPlayItem(mPlayingQueue, mCurrentIndexOnQueue)) {
             Log.e(LOG_TAG, "Can't retrieve current metadata.");
             mState = PlaybackState.STATE_ERROR;
             updatePlaybackState("No Metadata");
@@ -375,8 +417,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         }
         MediaSession.QueueItem queueItem = mPlayingQueue.get(mCurrentIndexOnQueue);
         String mediaId = queueItem.getDescription().getMediaId();
-        // TODO: obtain track metadata from google music
-        MediaMetadata track = null;// mMusicProvider.getMusic(mediaId);
+        MediaMetadata track = mMusicProvider.findTrackById(mediaId);
         String trackId = track.getString(MediaMetadata.METADATA_KEY_MEDIA_ID);
         if (!mediaId.equals(trackId)) {
             throw new IllegalStateException("track ID (" + trackId + ") " +
@@ -458,20 +499,11 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
         giveUpAudioFocus();
         updatePlaybackState(withError);
 
-        // TODO: hide media playback notification
-        // mMediaNotificationManager.stopNotification();
+        mNotificationManager.hidePlaybackManager();
 
         // service is no longer necessary. Will be started again if needed.
         stopSelf();
         mServiceStarted = false;
-    }
-
-    private boolean canPlayCurrent() {
-        return canPlay(mCurrentIndexOnQueue);
-    }
-
-    private boolean canPlay(int index) {
-        return mPlayingQueue != null && index >= 0 && index < mPlayingQueue.size();
     }
 
     private class MediaSessionCallback extends MediaSession.Callback {
@@ -481,8 +513,6 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
                 // TODO: random queue from google music
                 mPlayingQueue = null;// QueueHelper.getRandomQueue(mMusicProvider);
                 mSession.setQueue(mPlayingQueue);
-                // TODO: get random queue title
-                mSession.setQueueTitle(null/*getString(R.string.random_queue_title)*/);
                 // start playing from the beginning of the queue
                 mCurrentIndexOnQueue = 0;
             }
@@ -502,7 +532,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
 
                 // set the current index on queue from the music Id:
                 // TODO: obtain current track index for queue
-                mCurrentIndexOnQueue = 0; // QueueHelper.getMusicIndexOnQueue(mPlayingQueue, queueId);
+                mCurrentIndexOnQueue = getMusicIndexOnQueue(mPlayingQueue, queueId);
 
                 // play the music
                 handlePlayRequest();
@@ -520,20 +550,13 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
             // the hierarchy in MediaBrowser and the actual unique musicID. This is necessary
             // so we can build the correct playing queue, based on where the track was
             // selected from.
-            // TODO: obtain playing queue
-            mPlayingQueue = null; // QueueHelper.getPlayingQueue(mediaId, mMusicProvider);
+            Pair<String, String> albumToTrack = MediaIdUtil.extractFromTrackId(mediaId);
+            mPlayingQueue = convertToQueue(mMusicProvider.getTracks(albumToTrack.first));
             mSession.setQueue(mPlayingQueue);
-            // TODO: obtain queue title for id
-            String queueTitle = "";// getString(R.string.browse_musics_by_genre_subtitle, MediaIDHelper.extractBrowseCategoryValueFromMediaID(mediaId));
-            mSession.setQueueTitle(queueTitle);
 
             if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
-                // convert media id to unique id
-                String uniqueMusicID = "";// MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-
                 // set the current index on queue from the music Id:
-                // TODO: get index by unique id
-                mCurrentIndexOnQueue = 0;// QueueHelper.getMusicIndexOnQueue(mPlayingQueue, uniqueMusicID);
+                mCurrentIndexOnQueue = getMusicIndexOnQueue(mPlayingQueue, mediaId);
 
                 // play the music
                 handlePlayRequest();
@@ -556,7 +579,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
             if (mPlayingQueue != null && mCurrentIndexOnQueue >= mPlayingQueue.size()) {
                 mCurrentIndexOnQueue = 0;
             }
-            if (canPlayCurrent()) {
+            if (canPlayItem(mPlayingQueue, mCurrentIndexOnQueue)) {
                 mState = PlaybackState.STATE_STOPPED;
                 handlePlayRequest();
             } else {
@@ -575,7 +598,7 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
                 // first song.
                 mCurrentIndexOnQueue = 0;
             }
-            if (canPlayCurrent()) {
+            if (canPlayItem(mPlayingQueue, mCurrentIndexOnQueue)) {
                 mState = PlaybackState.STATE_STOPPED;
                 handlePlayRequest();
             } else {

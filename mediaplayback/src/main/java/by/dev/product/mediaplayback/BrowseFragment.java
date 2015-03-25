@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 GDG Minsk
+ * Copyright 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,17 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.content.ComponentName;
 import android.content.Context;
+import android.media.MediaDescription;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +80,7 @@ public class BrowseFragment extends ListFragment {
                 mBrowserAdapter.add(item);
             }
             mBrowserAdapter.notifyDataSetChanged();
+            setListShown(true);
         }
 
         @Override
@@ -106,6 +110,7 @@ public class BrowseFragment extends ListFragment {
 
         mBrowserAdapter = new BrowseAdapter(getActivity());
         mMediaBrowser = new MediaBrowser(getActivity(), new ComponentName(getActivity(), MusicService.class), mConnectionCallback, null);
+        setListAdapter(mBrowserAdapter);
     }
 
     @Override
@@ -147,17 +152,39 @@ public class BrowseFragment extends ListFragment {
     }
 
     private static class BrowseAdapter extends ArrayAdapter<MediaBrowser.MediaItem> {
+        private final LayoutInflater mInflater;
+
         public BrowseAdapter(Context context) {
             super(context, R.layout.list_item_browse, new ArrayList<MediaBrowser.MediaItem>());
+            mInflater = LayoutInflater.from(context);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return super.getView(position, convertView, parent);
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.list_item_browse, parent, false);
+                holder = new ViewHolder(convertView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            MediaBrowser.MediaItem item = getItem(position);
+            MediaDescription description = item.getDescription();
+            holder.title.setText(description.getTitle());
+            holder.description.setText(description.getDescription());
+
+            return convertView;
         }
 
         static class ViewHolder {
-
+            TextView title;
+            TextView description;
+            ViewHolder(View root) {
+                title = (TextView) root.findViewById(R.id.title);
+                description = (TextView) root.findViewById(R.id.description);
+            }
         }
     }
 }
