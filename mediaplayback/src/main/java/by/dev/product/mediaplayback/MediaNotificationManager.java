@@ -121,6 +121,7 @@ public class MediaNotificationManager {
 
     public void showPlaybackManager() {
         if (!mStarted) {
+            Log.d(LOG_TAG, "showPlaybackManager");
             mController.registerCallback(mSessionCallback);
             IntentFilter filter = new IntentFilter();
             filter.addAction(ACTION_NEXT);
@@ -137,6 +138,7 @@ public class MediaNotificationManager {
     }
 
     public void hidePlaybackManager() {
+        Log.d(LOG_TAG, "hidePlaybackManager");
         mStarted = false;
         mController.unregisterCallback(mSessionCallback);
         try {

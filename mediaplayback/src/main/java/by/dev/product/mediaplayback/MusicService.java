@@ -531,7 +531,6 @@ public class MusicService extends MediaBrowserService implements MediaPlayer.OnP
             if (mPlayingQueue != null && !mPlayingQueue.isEmpty()) {
 
                 // set the current index on queue from the music Id:
-                // TODO: obtain current track index for queue
                 mCurrentIndexOnQueue = getMusicIndexOnQueue(mPlayingQueue, queueId);
 
                 // play the music
