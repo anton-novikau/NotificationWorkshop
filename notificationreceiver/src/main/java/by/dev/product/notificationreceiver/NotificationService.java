@@ -20,6 +20,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -176,7 +177,7 @@ public class NotificationService extends IntentService {
             builder.setContentIntent(incomingCallPending);
         } else {
             Intent messageIntent = new Intent(this, ChatActivity.class);
-            messageIntent.putExtra(ChatActivity.EXTRA_MESSAGE, message);
+            messageIntent.putExtra(ChatActivity.EXTRA_INCOMING_MESSAGE, message);
             messageIntent.putExtra(ChatActivity.EXTRA_PARTICIPANT, callerName);
             messageIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             PendingIntent messagePendingIntent = PendingIntent.getActivity(this, 0, messageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -187,6 +188,19 @@ public class NotificationService extends IntentService {
         // setup large user icon for connected wearable
         Notification.WearableExtender extender = new Notification.WearableExtender();
         extender.setBackground(BitmapFactory.decodeResource(getResources(), R.drawable.joan_doe_large));
+        if (!isCall) {
+            RemoteInput ri = new RemoteInput.Builder(ChatActivity.EXTRA_OUTGOING_MSG)
+                    .setLabel(getString(R.string.reply_action))
+                    .setChoices(getResources().getStringArray(R.array.reply_choices))
+                    .build();
+            Intent replyIntent = new Intent(this, ChatActivity.class);
+            replyIntent.putExtra(ChatActivity.EXTRA_INCOMING_MESSAGE, message);
+            replyIntent.putExtra(ChatActivity.EXTRA_PARTICIPANT, callerName);
+            PendingIntent replyPendingIntent = PendingIntent.getActivity(this, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Notification.Action replyAction = new Notification.Action.Builder(R.drawable.ic_action_reply, getString(R.string.reply_action), replyPendingIntent).addRemoteInput(ri).build();
+            extender.addAction(replyAction);
+        }
         builder.extend(extender);
 
         Notification notification = builder.build();

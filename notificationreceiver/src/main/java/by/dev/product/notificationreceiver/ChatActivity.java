@@ -18,16 +18,17 @@ package by.dev.product.notificationreceiver;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.RemoteInput;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 
 public class ChatActivity extends Activity {
 
-    public static final String EXTRA_MESSAGE = "incoming_message";
+    public static final String EXTRA_INCOMING_MESSAGE = "incoming_message";
+    public static final String EXTRA_OUTGOING_MSG = "ougoing_message";
     public static final String EXTRA_PARTICIPANT = "participant_name";
 
     @Override
@@ -39,8 +40,18 @@ public class ChatActivity extends Activity {
         ActionBar ab = getActionBar();
         if (ab != null) ab.setTitle(intent.getStringExtra(EXTRA_PARTICIPANT));
 
-        TextView messageView = (TextView) findViewById(R.id.message);
-        messageView.setText(intent.getStringExtra(EXTRA_MESSAGE));
+        TextView incomingMessage = (TextView) findViewById(R.id.incoming_message);
+        View outgoingBox = findViewById(R.id.outgoing_message_box);
+        Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+        if (remoteInput != null) {
+            outgoingBox.setVisibility(View.VISIBLE);
+            TextView ougoingMessage = (TextView) findViewById(R.id.outgoing_message);
+            ougoingMessage.setText(remoteInput.getCharSequence(EXTRA_OUTGOING_MSG));
+        } else {
+            outgoingBox.setVisibility(View.GONE);
+        }
+        incomingMessage.setText(intent.getStringExtra(EXTRA_INCOMING_MESSAGE));
+
         // cancel call notification and stop ringing
         Intent cancelCallNotification = new Intent(this, NotificationService.class);
         cancelCallNotification.putExtra(NotificationService.EXTRA_ACION, NotificationService.ACTION_CANCEL_MESSAGE);
